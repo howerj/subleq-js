@@ -3,6 +3,8 @@
 <head>
 	<title>SUBLEQ eForth</title>
 	<meta charset="UTF-8">
+	<!-- icon from https://www.favicon.cc/?action=icon&file_id=927824, looks free -->
+	<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAHdElNRQflAwQSNCzUzyUcAAAAZElEQVQoz31RSxYAIQiCebOdW8xBuzlt+mGWbQQVyogZWnJiC11QRjij8gFQIzWOdWtM9aIA4LnaeKn8HZZ3srRZBi268DHTsUGrBYN049w1QUx87cL+KfE1iQIR7cZy9+UJACqZqS+d7tw82QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wMy0wNFQxODo1Mjo0NCswMDowMK54rJEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDMtMDRUMTg6NTI6NDQrMDA6MDDfJRQtAAAAAElFTkSuQmCC">
 	<style type="text/css">
 		body{margin:40px auto;max-width:50%;line-height:1.6;font-size:18px;color:#444;padding:0 10px;}
 		pre { white-space: pre-wrap; }
@@ -49,8 +51,8 @@
 		to by 'a' and stored to output. Input is taken from the keyboard and output is
 		the terminal screen in the case of this emulator.</p>
 		<p>The following program, written in C, is capable of executing the same images
-		that are used within this program:</p>
-		<pre>
+		that are used within this program, which you can click on to download:</p>
+		<pre style="color:blue;" onclick="downloadTextAsFile('subleq.c', unesc(event.currentTarget.innerHTML))">
 	#include &lt;stdio.h&gt;
 	int main(int x,char**v){FILE*f=fopen(v[1],"r");short p=0,m[1&lt;&lt;16],*i=m;
 	while(fscanf(f,"%hd",i++)&gt;0);for(;p&gt;=0;){int a=m[p++],b=m[p++],c=m[p++];
@@ -79,7 +81,7 @@
 		</p>
 		<p>
 		The following file contains a program that can be loaded that prints "Hi", 
-		<a href="data:application/octet-stream;charset=utf-8;base64,OQotMQozCjEwCi0xCjYKMAowCi0xCjcyCjEwNQowCg==">hi.dec</a>.
+		<a href="javascript:downloadTextAsFile('hi.dec', atob('OQotMQozCjEwCi0xCjYKMAowCi0xCjcyCjEwNQowCg=='))">hi.dec</a>.
 		</p>
 		<p> Happy hacking! </p>
 	</div>
@@ -611,6 +613,16 @@
 			document.getElementById("dump").innerHTML = dump(m, 65536, base);
 		}
 
+		function downloadTextAsFile(filename, text) {
+			var e = document.createElement('a');
+			e.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+			e.setAttribute('download', filename);
+			e.style.display = 'none';
+			document.body.appendChild(e);
+			e.click();
+			document.body.removeChild(e);
+		}
+
 		function openTab(evt, name) {
 			let tabcontent = document.getElementsByClassName("tabcontent");
 			for (let i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
@@ -710,6 +722,12 @@
 			document.getElementById('scroll').checked        = getCookie("scroll", "true") == "true" ? true : false;
 			document.getElementById('optimizeImage').checked = getCookie("optimizeImage", "true") == "true" ? true : false;
 			document.getElementById("base").value            = getCookie("base", 16);
+		}
+
+		function unesc(i) {
+			i = i.replace(/&amp;/g, '&');
+			i = i.replace(/&lt;/g, '<');
+			return i.replace(/&gt;/g, '>');
 		}
 
 		function esc(i) {
@@ -815,6 +833,7 @@
 		console.log("subleq running...");
 		loadImageFromArray(eForth);
 		queueDraw();
+		/*prompt();*/
 		subleq();
 	</script>
 </body>
