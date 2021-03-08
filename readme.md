@@ -5,6 +5,8 @@
 * Repo: <https://github.com/howerj/subleq-js>
 * License: [The Unlicense](LICENSE) / Public Domain
 
+CLICK HERE --> <https://howerj.github.io/subleq.htm> <-- TO TEST IT OUT.
+
 This project contains an interactive 16-bit SUBLEQ interpreter that
 should run in your web-browser, and by default it should run an eForth
 interpreter.
