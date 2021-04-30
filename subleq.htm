@@ -122,7 +122,7 @@
 	<canvas id="keydown"></canvas>
 	<script type="text/javascript">
 		const init = ".( EFORTH LOADED - USED:) here u. cr\n";
-		var screen = "", input = init, cursor = '<b class="blink">_</b>';
+		var display = "", input = init, cursor = '<b class="blink">_</b>';
 		var loaded = false, focused = false, running = true, reloadOnExit = true;
 		var redrawTimeout;
 		var pc = 0, cycles = 0, total = 0, m = new Uint16Array(65536);
@@ -590,21 +590,34 @@
 
 		function updateDump() {
 			function dump(a, as, base) {
+				function isgraph(u) {
+					return u >= 32 && u < 127;
+				}
+				function char(u) {
+					return isgraph(u) ? String.fromCharCode(u) : ".";
+				}
+				function chars(u) {
+					return char(u & 255) + char((u >> 8) & 255);
+				}
 				function maxPad(max, base) {
 					return Math.ceil(Math.log(max) / Math.log(base));
 				}
 				function pad(number, length) {
-					var str = '' + number;
-					while (str.length < length) str = '0' + str;
+					var str = "" + number;
+					while (str.length < length) str = "0" + str;
 					return str;
 				}
-				var r = "", p = maxPad(65536, base), cols = 20 - p;
+				var r = "", p = maxPad(65536, base), cols = 12 - p;
 				for (let i = 0; i < as; i += cols) {
 					var l = pad(i.toString(base), p) + ": ";
 					for (let j = 0; j < cols && (i + j) < as; j++) {
 						l += pad(m[i+j].toString(base), p) + " ";
 					}
-					r += l + "\n";
+					l += "\t|";
+					for (let j = 0; j < cols && (i + j) < as; j++) {
+						l += chars(m[i+j]);
+					}
+					r += l + "|\n";
 				}
 				return r;
 			}
@@ -614,10 +627,10 @@
 		}
 
 		function downloadTextAsFile(filename, text) {
-			var e = document.createElement('a');
-			e.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-			e.setAttribute('download', filename);
-			e.style.display = 'none';
+			var e = document.createElement("a");
+			e.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+			e.setAttribute("download", filename);
+			e.style.display = "none";
 			document.body.appendChild(e);
 			e.click();
 			document.body.removeChild(e);
@@ -643,12 +656,12 @@
 				return !isNaN(str) && !isNaN(parseFloat(str));
 			}
 			function save(filename, data) {
-				var blob = new Blob([data], {type: 'text/plain'});
+				var blob = new Blob([data], {type: "text/plain"});
 				if (window.navigator.msSaveOrOpenBlob) {
 					window.navigator.msSaveBlob(blob, filename);
 					return;
 				}
-				var elem = window.document.createElement('a');
+				var elem = window.document.createElement("a");
 				elem.href = window.URL.createObjectURL(blob);
 				elem.download = filename;
 				document.body.appendChild(elem);
@@ -666,8 +679,8 @@
 			let x = "";
 			for (let i = 0; i < cells; i++)
 				x += m[i].toString() + "\n";
-			if (document.getElementById('optimizeImage').checked)
-				x = x.replace(/(0\n)+$/g, '');
+			if (document.getElementById("optimizeImage").checked)
+				x = x.replace(/(0\n)+$/g, "");
 			save(filename, x);
 		}
 
@@ -684,9 +697,9 @@
 					m[i] = undefined == txt[i] ? 0 : parseInt(txt[i]);
 				loaded = true;
 			}
-			document.getElementById('input').files[0].text().then(t =>{ loadImageFromString(t); updateDump()});
+			document.getElementById("input").files[0].text().then(t =>{ loadImageFromString(t); updateDump();});
 			pc = 0;
-			screen = "";
+			display = "";
 			input = init;
 		}
 
@@ -698,9 +711,9 @@
 				document.cookie = cname + "=" + cvalue + "; SameSite=Strict; " + expires + ";path=/";
 			}
 			let expire = 365;
-			setCookie("highlight",     document.getElementById('highlight').checked,     expire);
-			setCookie("scroll",        document.getElementById('scroll').checked,        expire);
-			setCookie("optimizeImage", document.getElementById('optimizeImage').checked, expire);
+			setCookie("highlight",     document.getElementById("highlight").checked,     expire);
+			setCookie("scroll",        document.getElementById("scroll").checked,        expire);
+			setCookie("optimizeImage", document.getElementById("optimizeImage").checked, expire);
 			setCookie("base",          document.getElementById("base").value,            expire);
 		}
 
@@ -708,44 +721,44 @@
 			function getCookie(cname, defaultVal) {
 				let name = cname + "=";
 				let decodedCookie = decodeURIComponent(document.cookie);
-				let ca = decodedCookie.split(';');
+				let ca = decodedCookie.split(";");
 				for(let i = 0; i < ca.length; i++) {
 					let c = ca[i];
-					while (c.charAt(0) == ' ')
+					while (c.charAt(0) == " ")
 						c = c.substring(1);
 					if (c.indexOf(name) == 0)
 						return c.substring(name.length, c.length);
 				}
 				return defaultVal;
 			}
-			document.getElementById('highlight').checked     = getCookie("highlight", "true") == "true" ? true : false;
-			document.getElementById('scroll').checked        = getCookie("scroll", "true") == "true" ? true : false;
-			document.getElementById('optimizeImage').checked = getCookie("optimizeImage", "true") == "true" ? true : false;
+			document.getElementById("highlight").checked     = getCookie("highlight", "true") == "true" ? true : false;
+			document.getElementById("scroll").checked        = getCookie("scroll", "true") == "true" ? true : false;
+			document.getElementById("optimizeImage").checked = getCookie("optimizeImage", "true") == "true" ? true : false;
 			document.getElementById("base").value            = getCookie("base", 16);
 		}
 
 		function unesc(i) {
-			i = i.replace(/&amp;/g, '&');
-			i = i.replace(/&lt;/g, '<');
-			return i.replace(/&gt;/g, '>');
+			i = i.replace(/&amp;/g, "&");
+			i = i.replace(/&lt;/g, "<");
+			return i.replace(/&gt;/g, ">");
 		}
 
 		function esc(i) {
-			i = i.replace(/&/g, '&amp;');
-			i = i.replace(/</g, '&lt;');
-			return i.replace(/>/g, '&gt;');
+			i = i.replace(/&/g, "&amp;");
+			i = i.replace(/</g, "&lt;");
+			return i.replace(/>/g, "&gt;");
 		}
 
 		function highlight(i) { /* good enough, could also <u> things */
-			if (!document.getElementById('highlight').checked)
+			if (!document.getElementById("highlight").checked)
 				return i;
-			i = i.replace(/\b[0-9]+[^a-zA-Z=<>*\(\)\/@+&-]/g, function(x) { return "<b>" + x + "</b>" });
-			return i.replace(/\b(if|else|for|next|aft|then|while|begin|repeat|until|again)\b/g, function(x) { return "<i>" + x + "</i>" });
+			i = i.replace(/\b[0-9]+[^a-zA-Z=<>*\(\)\/@+&-]/g, function(x) { return "<b>" + x + "</b>"; });
+			return i.replace(/\b(if|else|for|next|aft|then|while|begin|repeat|until|again)\b/g, function(x) { return "<i>" + x + "</i>"; });
 		}
 
 		function doDraw() {
-			document.getElementById('subleq').innerHTML = "<pre>" + highlight(esc(screen)) + cursor + "</pre>";
-			if (document.getElementById('scroll').checked)
+			document.getElementById("subleq").innerHTML = "<pre>" + highlight(esc(display)) + cursor + "</pre>";
+			if (document.getElementById("scroll").checked)
 				window.scrollTo(0, document.body.scrollHeight);
 		}
 
@@ -758,27 +771,27 @@
 		}
 
 		function backspace() {
-			let last = screen.slice(-1);
-			if (last != '\n' && last != '\r')
-				screen = screen.substring(0, screen.length - 1);
+			let last = display.slice(-1);
+			if (last != "\n" && last != "\r")
+				display = display.substring(0, display.length - 1);
 		}
 
 		function keyToKey(k) { /* NB. Fun to funky */
 			switch (k) {
-			case "Enter": return '\n';
-			case "Escape": return '\u001B';
-			case "Delete": case "Backspace": return '\u0008';
-			default: if (k.length != 1) k = ''; return k;
+			case "Enter": return "\n";
+			case "Escape": return "\u001B";
+			case "Delete": case "Backspace": return "\u0008";
+			default: if (k.length != 1) k = ""; return k;
 			}
 		}
 
-		document.documentElement.addEventListener('keydown', function (e) {
+		document.documentElement.addEventListener("keydown", function (e) {
 			if (!focused) return false;
 			var k = keyToKey(e.key);
 			if (k.length === 0) { return false; }
-			else if (k === '\u0008') { backspace(); }
-			else if (k === '\u001B') { running = false; return false; }
-			else { screen += k; }
+			else if (k === "\u0008") { backspace(); }
+			else if (k === "\u001B") { running = false; return false; }
+			else { display += k; }
 			input += k;
 			queueDraw();
 			return false;
@@ -794,8 +807,8 @@
 
 		function putch(ch) {
 			let o = String.fromCharCode(ch);
-			if (o === '\u0008') { backspace(); }
-			else { screen += o; }
+			if (o === "\u0008") { backspace(); }
+			else { display += o; }
 			queueDraw();
 		}
 
@@ -828,12 +841,11 @@
 			if (reloadOnExit)
 				window.location.reload();
 		}
-		document.getElementsByClassName('tablinks')[0].click();
+		document.getElementsByClassName("tablinks")[0].click();
 		setValuesFromCookies();
 		console.log("subleq running...");
 		loadImageFromArray(eForth);
 		queueDraw();
-		/*prompt();*/
 		subleq();
 	</script>
 </body>
