@@ -31,10 +31,10 @@
 	</div>
 	<div id="subleq" class="tabcontent"> </div>
 	<div id="help"   class="tabcontent">
-		<p>This system contains a <a href=" https://en.wikipedia.org/wiki/One-instruction_set_computer">SUBLEQ</a>
-		virtual machine, a 16-bit version, that will automatically boot an eForth image, which is a variant of
+		<p>This system contains a 16-bit <a href=" https://en.wikipedia.org/wiki/One-instruction_set_computer">SUBLEQ</a>
+		virtual machine, that will automatically boot an eForth image, which is a variant of
 		<a href="https://en.wikipedia.org/wiki/Forth_(programming_language)">Forth</a>, a stack
-		based programming language suitable for constrained system.  What makes this system special
+		based programming language suitable for constrained systems.  What makes this system special
 		is that SUBLEQ is a Turing complete <i>single instruction</i> machine, the instruction
 		is short for "Subtract and Branch If Less Than Or Equal To Zero", it does a little more
 		than that, but it means we do not have access to multiplication, division, addition,
@@ -58,7 +58,7 @@
 	while(fscanf(f,"%hd",i++)&gt;0);for(;p&gt;=0;){int a=m[p++],b=m[p++],c=m[p++];
 	a&lt;0?m[b]=getchar():b&lt;0?putchar(m[a]):(m[b]-=m[a])&lt;=0?p=c:0;}}
 		</pre>
-		<p> A Forth tutorial is beyond this help section. However, here are a few commands
+		<p>A Forth tutorial is beyond this help section. However, here are a few commands
 		you can type into the system to get started: </p>
 		<pre> words </pre>
 		<p>This will print out a list of all of the built in functions defined in Forth.</p>
@@ -75,15 +75,12 @@
 		available at <a href="https://github.com/howerj/subleq">https://github.com/howerj/subleq</a>.
 		You can find and load newer images there, specifically 
 		<a href="https://raw.githubusercontent.com/howerj/subleq/master/subleq.dec">here</a>, which
-		you should be able to load from "image" tab. The system is self-hosting, it can be used
+		you should be able to load from the "image" tab. The system is self-hosting, it can be used
 		to generate new eForth images if fed the right source code, although that is best done
-		from the command line and not on this web-site.
-		</p>
-		<p>
-		The following file contains a program that can be loaded that prints "Hi", 
-		<a href="javascript:downloadTextAsFile('hi.dec', atob('OQotMQozCjEwCi0xCjYKMAowCi0xCjcyCjEwNQowCg=='))">hi.dec</a>.
-		</p>
-		<p> Happy hacking! </p>
+		from the command line version and not on this web-site.</p>
+		<p>The following file contains a program that can be loaded that prints "Hi", 
+		<a href="javascript:downloadTextAsFile('hi.dec', atob('OQotMQozCjEwCi0xCjYKMAowCi0xCjcyCjEwNQowCg=='))">hi.dec</a>.</p>
+		<p>Happy hacking!</p>
 	</div>
 	<div id="about" class="tabcontent">
 		<table style="width:100%">
@@ -908,16 +905,16 @@
 		}
 
 		function subleq() { /* The ISA of the future! */
-			if (!loaded) { setTimeout(subleq, 20); return; }
+			if (!loaded) { setTimeout(subleq, 10); return; }
 			while ((pc & 0x8000) === 0 && running) {
-				if (cycles++ > 10000000 || !focused) { cycles = 0; setTimeout(subleq, 10); return; }
+				if (cycles++ > 1000000 || !focused) { cycles = 0; setTimeout(subleq, 1); return; }
 				let a = m[pc+0];
 				let b = m[pc+1];
 				let c = m[pc+2];
 				if (a === 0xFFFF) {
 					let ch = getch();
 					if (ch < 0) {
-						setTimeout(subleq, 20);
+						setTimeout(subleq, 10);
 						return;
 					}
 					m[b] = ch;
