@@ -6,19 +6,20 @@
 	<!-- icon from https://www.favicon.cc/?action=icon&file_id=927824, looks free -->
 	<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAHdElNRQflAwQSNCzUzyUcAAAAZElEQVQoz31RSxYAIQiCebOdW8xBuzlt+mGWbQQVyogZWnJiC11QRjij8gFQIzWOdWtM9aIA4LnaeKn8HZZ3srRZBi268DHTsUGrBYN049w1QUx87cL+KfE1iQIR7cZy9+UJACqZqS+d7tw82QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0wMy0wNFQxODo1Mjo0NCswMDowMK54rJEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMDMtMDRUMTg6NTI6NDQrMDA6MDDfJRQtAAAAAElFTkSuQmCC">
 	<style type="text/css">
-		body{margin:40px auto;max-width:50%;line-height:1.6;font-size:18px;color:#444;padding:0 10px;}
+		body {margin:1% auto;max-width:75%;line-height:1.6;font-size:x-large;color:#444;padding:0 10px;}
 		pre { white-space: pre-wrap; }
 		.tab { overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }
 		.tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; }
 		.tab button:hover { background-color: #ddd; }
 		.tab button.active { background-color: #ccc; }
 		.tabcontent { display: none; padding: 6px 12px; border: 1px solid #ccc; border-top: none; }
-		.blink { animation: blinker 0.6s linear infinite; color: #333333; font-size: 24px; font-weight: bold; }
+		.blink { animation: blinker 0.6s linear infinite; color: #333333; font-size: large; font-weight: bold; }
 		@keyframes blinker { 50% { opacity: 0; } }
 		label.buttonHack input[type="file"] { position:absolute; top: -1000px; }
 		.buttonHack { border: 2px solid #AAA; border-radius: 4px; padding: 2px 5px; margin: 2px; background: #DDD; display: inline-block; }
 		.buttonHack :hover { background: #CCC; }
 		.buttonHack :active { background: #CCF; }
+		.tablinks { font-size: large; }
 	</style>
 </head>
 <body>
@@ -29,7 +30,7 @@
 		<button class="tablinks" onclick="openTab(event, 'help')">help</button>
 		<button class="tablinks" onclick="openTab(event, 'about')">about</button>
 	</div>
-	<div id="subleq" class="tabcontent"> </div>
+	<div id="subleq" class="tabcontent"><input type="text" class="body" id="subleq-input"></div>
 	<div id="help"   class="tabcontent">
 		<p>This system contains a 16-bit <a href=" https://en.wikipedia.org/wiki/One-instruction_set_computer">SUBLEQ</a>
 		virtual machine, that will automatically boot an eForth image, which is a variant of
