@@ -20,9 +20,32 @@
 		.buttonHack :hover { background: #CCC; }
 		.buttonHack :active { background: #CCF; }
 		.tablinks { font-size: large; }
+
+		/*:root { --primary: #2563eb; --bg-light: #f1f5f9; --bg-alert: #1d4ed8; --bg-callout: #dbeafe; --border-base: #cbd5e1; --text-base: #475569; }*/
+		:root { --primary: #2563eb; --bg-light: #CCC; --bg-alert: #DDD; --bg-callout: #dbeafe; --border-base: #cbd5e1; --text-base: #475569; }
+		.alert { background: var(--bg-alert); padding: 1rem; text-align: center; color: white; position: relative; transform: scaleY(1); transition: all ease-in-out .3s; }
+		.alert button { border: none; background: transparent; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: absolute; top: 8px; right: 5px; }
+		.alert button:hover { background: rgba(255, 255, 255,.35); }
+		.alert-hidden { opacity: 0; padding: 0; visibility: hidden; transform: scaleY(0); transform-origin: top; transition: all ease-in-out .3s; }
+		.alert button:focus { box-shadow: inset 0 0 0 2px var(--border-base); }
+		.header { border-bottom: 1px solid var(--border-base); }
+		.header, .footer { padding: 1rem; }
+		.footer { background: var(--bg-light); padding: 1rem; }
+		.header ul li, .footer ul li { display: inline; padding: 0 5px; }
+		.main { max-width: 767px; padding: 1rem; margin-left: 2.75rem; margin-bottom: 2rem; }
+		.callout { background: var(--bg-callout); padding: 2rem; border-radius: 6px; }
+		p { color: var(--text-base); line-height: 1.4; }
+		ul { list-style: none; }
+		/*a { color: var(--primary); text-decoration: none; }*/
 	</style>
 </head>
 <body>
+	<div class="alert" role="alert">
+		📖 <a href="https://www.amazon.com/SUBLEQ-EFORTH-Forth-Metacompilation-Machine/dp/B0B5KV548D">Don't forget to checkout my book on SUBLEQ eFORTH!</a> 📚
+		<button>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>close</title><g fill="none"><path stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 6.75l-10.5 10.5"></path><path stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75l10.5 10.5"></path></g></svg>
+		</button>
+	</div>
 	<div class="tab">
 		<button class="tablinks" onclick="openTab(event, 'subleq')">subleq</button>
 		<button class="tablinks" onclick="openTab(event, 'image')">image</button>
@@ -96,14 +119,16 @@
 		</table>
 	</div>
 	<div id="settings" class="tabcontent">
-		<input type="checkbox" id="highlight" name="highlight" onchange="saveCookies()" checked>
+		<input type="checkbox" id="highlight" name="highlight" onchange="saveState()" checked>
 		<label for="highlight">highlight </label><br>
-		<input type="checkbox" id="scroll" name="scroll" onchange="saveCookies()"  checked>
+		<input type="checkbox" id="scroll" name="scroll" onchange="saveState()"  checked>
 		<label for="scroll">scroll </label><br>
-		<input type="checkbox" id="optimizeImage" name="optimizeImage" onchange="saveCookies()" checked>
+		<input type="checkbox" id="optimizeImage" name="optimizeImage" onchange="saveState()" checked>
 		<label for="optimizeImage">remove trailing zeros on save </label><br>
+		<input type="checkbox" id="hideAlert" name="hideAlert" onchange="saveState()" checked>
+		<label for="hideAlert">hide alert about my rad e-book</label><br>
 		<label for="base">base </label>
-		<input type="number" id="base" name="base" min="2" max="36" onchange="saveCookies()" value=16>
+		<input type="number" id="base" name="base" min="2" max="36" onchange="saveState()" value=16>
 	</div>
 	<div id="image" class="tabcontent">
 		<div>
@@ -747,18 +772,10 @@
 
 		function updateDump() {
 			function dump(a, as, base) {
-				function isgraph(u) {
-					return u >= 32 && u < 127;
-				}
-				function char(u) {
-					return isgraph(u) ? String.fromCharCode(u) : ".";
-				}
-				function chars(u) {
-					return char(u & 255) + char((u >> 8) & 255);
-				}
-				function maxPad(max, base) {
-					return Math.ceil(Math.log(max) / Math.log(base));
-				}
+				function isgraph(u) { return u >= 32 && u < 127; }
+				function char(u) { return isgraph(u) ? String.fromCharCode(u) : "."; }
+				function chars(u) { return char(u & 255) + char((u >> 8) & 255); }
+				function maxPad(max, base) { return Math.ceil(Math.log(max) / Math.log(base)); }
 				function pad(number, length) {
 					var str = "" + number;
 					while (str.length < length) str = "0" + str;
@@ -804,7 +821,18 @@
 			switch (name) {
 			case "subleq": queueDraw(); focused = true; break;
 			case "image": updateDump(); break;
+			case "settings": setValuesFromStorage(); break;
 			}
+		}
+
+		function bringUpKeyboardOnMobile() {
+			let input = document.createElement("input");
+			const name = "fakeTextField" + Math.random();
+			input.type = "text";
+			input.id = name;
+			document.body.appendChild(input);
+			document.getElementById(name).focus();
+			document.getElementById(name).style.display = "none";
 		}
 
 		function saveImage() {
@@ -835,8 +863,8 @@
 				cells = 65536;
 			let x = "";
 			for (let i = 0; i < cells; i++)
-				x += m[i].toString() + "\n";
-			if (document.getElementById("optimizeImage").checked)
+				x += m[i].toString() + "\n"; /* NB. Could use saved base here */
+			if (document.getElementById("optimizeImage").checked) /* WTF? This is very brittle, why did I decide this was a good thing... */
 				x = x.replace(/(0\n)+$/g, "");
 			save(filename, x);
 		}
@@ -860,38 +888,27 @@
 			input = init;
 		}
 
-		function saveCookies() {
-			function setCookie(cname, cvalue, exdays) {
-				let d = new Date();
-				d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-				let expires = "expires="+ d.toUTCString();
-				document.cookie = cname + "=" + cvalue + "; SameSite=Strict; " + expires + ";path=/";
-			}
-			let expire = 365;
-			setCookie("highlight",     document.getElementById("highlight").checked,     expire);
-			setCookie("scroll",        document.getElementById("scroll").checked,        expire);
-			setCookie("optimizeImage", document.getElementById("optimizeImage").checked, expire);
-			setCookie("base",          document.getElementById("base").value,            expire);
+		function saveState() {
+			function setVal(cname, cvalue) { return localStorage.setItem(cname, cvalue); }
+			setVal("highlight",     document.getElementById("highlight").checked);
+			setVal("scroll",        document.getElementById("scroll").checked);
+			setVal("optimizeImage", document.getElementById("optimizeImage").checked);
+			setVal("hideAlert",     document.getElementById("hideAlert").checked);
+			setVal("base",          document.getElementById("base").value);
 		}
 
-		function setValuesFromCookies() {
-			function getCookie(cname, defaultVal) {
-				let name = cname + "=";
-				let decodedCookie = decodeURIComponent(document.cookie);
-				let ca = decodedCookie.split(";");
-				for(let i = 0; i < ca.length; i++) {
-					let c = ca[i];
-					while (c.charAt(0) == " ")
-						c = c.substring(1);
-					if (c.indexOf(name) == 0)
-						return c.substring(name.length, c.length);
-				}
+		function setValuesFromStorage() {
+			function getVal(cname, defaultVal) {
+				let val = localStorage.getItem(cname);
+				if (val !== null) { return val; }
 				return defaultVal;
 			}
-			document.getElementById("highlight").checked     = getCookie("highlight", "true") == "true" ? true : false;
-			document.getElementById("scroll").checked        = getCookie("scroll", "true") == "true" ? true : false;
-			document.getElementById("optimizeImage").checked = getCookie("optimizeImage", "true") == "true" ? true : false;
-			document.getElementById("base").value            = getCookie("base", 16);
+			function toBool(val) { return val === "true" ? true : false; }
+			document.getElementById("highlight").checked     = toBool(getVal("highlight", "true"));
+			document.getElementById("scroll").checked        = toBool(getVal("scroll", "true"));
+			document.getElementById("optimizeImage").checked = toBool(getVal("optimizeImage", "true"));
+			document.getElementById("hideAlert").checked     = toBool(getVal("hideAlert", "false"));
+			document.getElementById("base").value            = getVal("base", 16);
 		}
 
 		function unesc(i) {
@@ -953,6 +970,20 @@
 			queueDraw();
 			return false;
 		}, false);
+
+		const alert = document.querySelector('.alert');
+
+		alert.style.display = "block";
+		if (localStorage.getItem('hideAlert') === "true") { alert.style.display = "none"; }
+
+		const dismissAlertButton = document.querySelector('.alert button');
+		if (dismissAlertButton) {
+			dismissAlertButton.addEventListener('click', event => {
+				event.preventDefault();
+				alert.classList.add('alert-hidden');
+				localStorage.setItem("hideAlert", true);
+			})
+		} 
 
 		function getch() {
 			if (input.length === 0)
@@ -1016,7 +1047,8 @@
 				window.location.reload();
 		}
 		document.getElementsByClassName("tablinks")[0].click();
-		setValuesFromCookies();
+		bringUpKeyboardOnMobile();
+		setValuesFromStorage();
 		console.log("subleq running...");
 		loadImageFromArray(eForth);
 		queueDraw();
